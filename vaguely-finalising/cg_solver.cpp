@@ -13,13 +13,23 @@
 #include <ctime>
 #include <execution>
 #include <exec/static_thread_pool.hpp>
-#include "libraryfuncs.h"
+#include "libraryfuncs.hpp"
 #include "matrix_gen.hpp"
+#include "precondition.hpp"
 
 namespace stdexec=std::execution;
 using namespace std::this_thread;
+using namespace mylibs;
+using namespace mymats;
+using namespace precon;
 //WHEN YOU EVENTUALLY COME BACK HERE: RUN THROUGH AND ADD NUMROW/NUMCOLUMN KNOWLEDGE ON EACH MATRIX
 //IN THEORY, WE SET A NUMBER OF ROWS AND COLS WHEN WE MAKE A SPARSE MATRIX. Reuse those numbers.
+
+// int coo(std::vector<double> A,std::vector<double> &Arow, std::vector<double>&Acolumn,std::vector<double>&Adata,int rows,int cols); 
+// std::pair<std::pair<std::vector<double>,std::vector<double>>,std::vector<double>> coo_spgemm(std::vector<double> Arow,std::vector<double> Acolumn,std::vector<double> Adata,int Anumrows,int Anumcols,std::vector<double> Brow,std::vector<double> Bcolumn,std::vector<double> Bdata,int Bnumrows,int Bnumcols);
+// std::vector<double> vectortranspose(const std::vector<double> vector); 
+// bool roundtoepsilon(const double x, double epsilon);
+
 
 std::vector<double> testmvdot_product(std::vector<double> Arow, std::vector<double> Acolumn,std::vector<double>Adata, const std::span<double> vector){   
     

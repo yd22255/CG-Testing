@@ -13,9 +13,9 @@
 #include <ctime>
 #include <execution>
 #include "matrix_gen.hpp"
-#include <exec/static_thread_pool.hpp>
 
-double random_element(){
+
+double mymats::random_element(){
     int min = 1;
     int max = 5;
 
@@ -29,7 +29,7 @@ double random_element(){
     return randomValue; 
 }
 
-std::vector<double> diagonally_dominant(std::vector<double> matrix, int vectorsize){ //must be square
+std::vector<double> mymats::diagonally_dominant(std::vector<double> matrix, int vectorsize){ //must be square
     std::mdspan<double,std::dextents<size_t,2>> matrixspan {matrix.data(),vectorsize,vectorsize};
                                                         //{ 
     for (int i = 0; i < matrixspan.extent(0); i++){     //|
@@ -39,8 +39,8 @@ std::vector<double> diagonally_dominant(std::vector<double> matrix, int vectorsi
         std::cout<<"\n";                                //|
     }                                                   //|
     std::cout<<"\n";                                    //} purely for dev checking
-    exec::static_thread_pool pool(8);
-    auto sched = pool.get_scheduler();
+    // exec::static_thread_pool pool(8);
+    // auto sched = pool.get_scheduler();
     auto v=std::views::iota(0, vectorsize);
     // auto sumspansnd = stdexec::schedule(sched)
     // | stdexec::bulk(std::execution::par,matrixspan.extent(0), [&](int i) { 
@@ -75,7 +75,7 @@ std::vector<double> diagonally_dominant(std::vector<double> matrix, int vectorsi
     return matrix;
 }
 
-std::vector<double> symmetric(std::vector<double> matrix, int vectorsize){
+std::vector<double> mymats::symmetric(std::vector<double> matrix, int vectorsize){
     std::mdspan<double,std::dextents<size_t,2>> matrixspan {matrix.data(),vectorsize,vectorsize};
     int vs2 = vectorsize*vectorsize;
     auto v = std::views::iota(0, vs2);
@@ -87,7 +87,7 @@ std::vector<double> symmetric(std::vector<double> matrix, int vectorsize){
     return matrix;
 }
 
-std::vector<double> generate_sparse_matrix(const double size, const double nonzeros){ 
+std::vector<double> mymats::generate_sparse_matrix(const double size, const double nonzeros){ 
     //this is currently generating the wrong number of nonzeros, because of symmetric/diag. 
     //need to figure out a better generation algorithm that guarantees the nonzero count at the end?
     //going to be really hard because of DD, nonzero count becomes minimum sqrt(size) plus the symmetric nonzeros
@@ -105,7 +105,7 @@ std::vector<double> generate_sparse_matrix(const double size, const double nonze
     return aDD; 
 }
 
-std::vector<double> generate_vector(const double size){ //needs fixing to be able to generate 0s, but not hard
+std::vector<double> mymats::generate_vector(const double size){ //needs fixing to be able to generate 0s, but not hard
     int vectorsize = sqrt(size);
     std::vector<double> a(size,0.0);
     //generate 0 matrix

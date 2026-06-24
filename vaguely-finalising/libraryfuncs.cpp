@@ -12,13 +12,14 @@
 #include <ranges>
 #include <ctime>
 #include <execution>
-#include "libraryfuncs.h"
+#include "libraryfuncs.hpp"
 //#include <exec/static_thread_pool.hpp>
 #define assert
 //all this needs to be parallelised.
 
+using namespace mylibs;
 
-std::vector<double> sparsemvdot_product(std::vector<double> Arow, std::vector<double> Acolumn,std::vector<double>Adata, const std::span<double> vector){   
+std::vector<double> mylibs::sparsemvdot_product(std::vector<double> Arow, std::vector<double> Acolumn,std::vector<double>Adata, const std::span<double> vector){   
     
     int vectorsize = vector.size();
     int vs2 = vectorsize*vectorsize;
@@ -41,16 +42,16 @@ std::vector<double> sparsemvdot_product(std::vector<double> Arow, std::vector<do
     return result;
 }
 
-std::vector<double> vectortranspose(const std::vector<double> vector){   
+std::vector<double> mylibs::vectortranspose(const std::vector<double> vector){   
     return vector; //returns 0 on compilerexplorer, here mostly for the sake of developer mathematical understanding
 } 
 
-double vvdot_product(const std::vector<double> v1, const std::vector<double> v2){   
+double mylibs::vvdot_product(const std::vector<double> v1, const std::vector<double> v2){   
     double result = inner_product(v1.begin(), v1.end(), v2.begin(), 0.0l);
     return result;
 }
 
-std::pair<std::pair<std::vector<double>,std::vector<double>>,std::vector<double>> matrixtranspose(std::vector<double> Mrow,std::vector<double> Mcolumn,std::vector<double> Mdata){  
+std::pair<std::pair<std::vector<double>,std::vector<double>>,std::vector<double>> mylibs::matrixtranspose(std::vector<double> Mrow,std::vector<double> Mcolumn,std::vector<double> Mdata){  
     std::vector<double> resultRow(Mrow.size(),0);
     std::vector<double> resultColumn(Mcolumn.size(),0);
     //in theory
@@ -70,7 +71,7 @@ std::pair<std::pair<std::vector<double>,std::vector<double>>,std::vector<double>
     return toreturn;
 }
 
-std::vector<double> densematrixtranspose(std::vector<double> matrix){
+std::vector<double> mylibs::densematrixtranspose(std::vector<double> matrix){
     int vectorsize=sqrt(matrix.size());  
     std::vector<double> result(matrix.size(),0);
     std::mdspan<double,std::dextents<size_t,2>> matrixspan {matrix.data(),vectorsize,vectorsize};
@@ -84,7 +85,7 @@ std::vector<double> densematrixtranspose(std::vector<double> matrix){
     return result;
 }
 
-std::vector<double> vectorize(std::vector<double>Arow,std::vector<double>Acolumn,std::vector<double>Adata){
+std::vector<double> mylibs::vectorize(std::vector<double>Arow,std::vector<double>Acolumn,std::vector<double>Adata){
     std::vector<double> v(Arow.size());
     for (int i=1; i <= Arow.size(); i++){ // just copy the values from the first column
         v[i]=Arow[i];
@@ -92,7 +93,7 @@ std::vector<double> vectorize(std::vector<double>Arow,std::vector<double>Acolumn
     return v;
 }
 
-double norm(std::vector<double> vector){
+double mylibs::norm(std::vector<double> vector){
     int vectorsize = vector.size();
     auto v = std::views::iota(0, vectorsize);
     std::vector<double> sumtotal(v.size(),0);
@@ -104,7 +105,7 @@ double norm(std::vector<double> vector){
     return sqrt(addupsumtotal);
 }
 
-std::pair<std::pair<std::vector<double>,std::vector<double>>,std::vector<double>> cootocsr(std::vector<double> Arow,std::vector<double> Acolumn,std::vector<double> Adata,int numrows,int numcols){
+std::pair<std::pair<std::vector<double>,std::vector<double>>,std::vector<double>> mylibs::cootocsr(std::vector<double> Arow,std::vector<double> Acolumn,std::vector<double> Adata,int numrows,int numcols){
     int nonzeros=Adata.size();
     std::vector<double>csrRows(0,numrows+1);
     for (int i = 0; i < nonzeros; i++){
@@ -118,18 +119,20 @@ std::pair<std::pair<std::vector<double>,std::vector<double>>,std::vector<double>
     return toreturn;  
 }
 
-int csrvalueaccess(std::vector<double> Ainds, std::vector<double>Adata,int x, int y){
+int mylibs::csrvalueaccess(std::vector<double> Ainds, std::vector<double>Adata,int x, int y){
     double remainder=Ainds[y+1]-Ainds[y];
     return Adata[remainder+(x-1)];
 }
 
-int csrvalueupdate(std::vector<double> Ainds, std::vector<double>Adata,int x, int y,double total){
+int mylibs::csrvalueupdate(std::vector<double> Ainds,std::vector<double> Acol, std::vector<double>Adata,int x, int y,double total){
     double remainder=Ainds[y+1]-Ainds[y];
     Adata[remainder+(x-1)]=total;
-    //update column in here
+    //the data just goes into the row of A we're operating on. 
+    
+    //update column and Cinds in here
 }
 
-std::pair<std::pair<std::vector<double>,std::vector<double>>,std::vector<double>> coo_spgemm(std::vector<double> Arow,std::vector<double> Acolumn,std::vector<double> Adata,int Anumrows,int Anumcols,std::vector<double> Brow,std::vector<double> Bcolumn,std::vector<double> Bdata,int Bnumrows,int Bnumcols){
+std::pair<std::pair<std::vector<double>,std::vector<double>>,std::vector<double>> mylibs::coo_spgemm(std::vector<double> Arow,std::vector<double> Acolumn,std::vector<double> Adata,int Anumrows,int Anumcols,std::vector<double> Brow,std::vector<double> Bcolumn,std::vector<double> Bdata,int Bnumrows,int Bnumcols){
     //this is just spmm
     //for some reason people call it SPGEMM - sparse generalised matrix multiplication
     //coo is the requirements - takes in a COO-stored matrix
@@ -163,7 +166,7 @@ std::pair<std::pair<std::vector<double>,std::vector<double>>,std::vector<double>
                 auto Amk = csrvalueaccess(Ainds,Adata,m,k);
                 auto Bkn=csrvalueaccess(Binds,Bdata,k,n);
                 auto total=Cmn+(Amk*Bkn);
-                csrvalueupdate(Cinds,Cdata,m,n,total);
+                csrvalueupdate(Cinds,Ccolumn,Cdata,m,n,total);
 
                 //during iteration through indices
 
@@ -196,7 +199,7 @@ std::pair<std::pair<std::vector<double>,std::vector<double>>,std::vector<double>
 //     return 0;
 // }
 
-std::pair<std::pair<std::vector<double>,std::vector<double>>,std::vector<double>> coo_jacobi(std::vector<double> &Arow, std::vector<double>&Acolumn,std::vector<double>&Adata){
+std::pair<std::pair<std::vector<double>,std::vector<double>>,std::vector<double>> mylibs::coo_jacobi(std::vector<double> &Arow, std::vector<double>&Acolumn,std::vector<double>&Adata){
     //take the matrix and create a diagonal matrix
     std::vector<double> retRow (Arow.size(),0);
     std::vector<double> retCol (Acolumn.size(),0);
@@ -218,7 +221,7 @@ std::pair<std::pair<std::vector<double>,std::vector<double>>,std::vector<double>
     std::pair<std::pair<std::vector<double>,std::vector<double>>,std::vector<double>> toreturn = std::make_pair(tuple,retData);
 }
 
-std::pair<std::pair<std::vector<double>,std::vector<double>>,std::vector<double>> coo_ilu(std::vector<double> &Arow, std::vector<double>&Acolumn,std::vector<double>&Adata){
+std::pair<std::pair<std::vector<double>,std::vector<double>>,std::vector<double>> mylibs::coo_ilu(std::vector<double> &Arow, std::vector<double>&Acolumn,std::vector<double>&Adata){
     int size = Arow.size(); //think i should make this nonsquare
     std::vector<double> LRow (Arow.size(),0);
     std::vector<double> LCol (Acolumn.size(),0);
@@ -308,7 +311,7 @@ std::pair<std::pair<std::vector<double>,std::vector<double>>,std::vector<double>
 
 
 
-int coo(std::vector<double> A,std::vector<double> &Arow, std::vector<double>&Acolumn,std::vector<double>&Adata,int rows,int cols){ 
+int mylibs::coo(std::vector<double> A,std::vector<double> &Arow, std::vector<double>&Acolumn,std::vector<double>&Adata,int rows,int cols){ 
     std::mdspan<double,std::dextents<size_t,2>> Aspan {A.data(),rows,cols};
     Arow.clear();
     Acolumn.clear();
@@ -327,11 +330,11 @@ int coo(std::vector<double> A,std::vector<double> &Arow, std::vector<double>&Aco
     return 0;
 } 
 
-int csr(std::vector<double> A,std::vector<double> &Arow, std::vector<double>&Acolumn,std::vector<double>&Adata,int rows,int cols){
-
+int mylibs::csr(std::vector<double> A,std::vector<double> &Arow, std::vector<double>&Acolumn,std::vector<double>&Adata,int rows,int cols){
+    return 0;
 }
 
-bool roundtoepsilon(const double x, double epsilon){
+bool mylibs::roundtoepsilon(const double x, double epsilon){
     if (x<round(x)&&x>(round(x)-abs(epsilon))){
         return true;
     } else if (x>round(x)&&x<(round(x)+abs(epsilon))){
@@ -340,3 +343,4 @@ bool roundtoepsilon(const double x, double epsilon){
         return false;
     }
 }
+
